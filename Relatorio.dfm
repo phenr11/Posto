@@ -160,7 +160,6 @@ object FrmRelatorio: TFrmRelatorio
     end
   end
   object FDQuery: TFDQuery
-    Active = True
     Connection = dmConexao.FDConnection
     SQL.Strings = (
       'SELECT'
