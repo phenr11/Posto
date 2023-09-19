@@ -1,0 +1,41 @@
+unit Tanque.Model;
+
+interface
+type
+  TTanque = class
+    private
+      FTanqueId: Integer;
+      FTipoCombustivel: string;
+    public
+      property TanqueId: Integer read FTanqueId write FTanqueId;
+      property TipoCombustivel: string read FTipoCombustivel write FTipoCombustivel;
+  end;
+
+  TBomba = class
+  private
+    FBombaId: Integer;
+    FTanqueId: Integer;
+  public
+    property BombaId: Integer read FBombaId write FBombaId;
+    property TanqueId: Integer read FTanqueId write FTanqueId;
+  end;
+
+  TAbastecimento = class
+  private
+    FTanque: TTanque;
+    FBomba: TBomba;
+    FQuantidadeLitros: Double;
+    FValorAbastecido: Double;
+    FImposto: Double;
+  public
+    constructor Create(ATanque: TTanque; ABomba: TBomba; QuantidadeLitros: Double);
+    property Tanque: TTanque read FTanque;
+    property Bomba: TBomba read FBomba;
+    property QuantidadeLitros: Double read FQuantidadeLitros;
+    property ValorAbastecido: Double read FValorAbastecido;
+    property Imposto: Double read FImposto;
+  end;
+
+implementation
+
+end.

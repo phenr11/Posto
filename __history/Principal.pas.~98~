@@ -1,0 +1,241 @@
+unit Principal;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Mask,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error,
+  FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Phys,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys.FB,
+  FireDAC.Phys.FBDef, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf,
+  FireDAC.VCLUI.Wait, FireDAC.Phys.IBBase, FireDAC.Comp.UI,
+  FireDAC.Comp.Client, Data.DB, FireDAC.DApt, FireDAC.Comp.DataSet, Modelo, Relatorio, Conexao;
+
+type
+  TFrmPrincipal = class(TForm)
+    GroupBox1: TGroupBox;
+    rbGasolina1: TRadioButton;
+    rbDiesel2: TRadioButton;
+    rbGasolina2: TRadioButton;
+    rbDiesel1: TRadioButton;
+    lblGasolina: TLabel;
+    lblDiesel: TLabel;
+    btnAbastecer: TButton;
+    cbTipoAbastecimento: TComboBox;
+    medtQtdAbastecimento: TMaskEdit;
+    Button1: TButton;
+    procedure btnAbastecerClick(Sender: TObject);
+    procedure cbTipoAbastecimentoChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    { Private declarations }
+    vlValorGasolina: Currency;
+    vlValorDiesel: Currency;
+
+    function BuscarTanqueId(out vpTipoCombustivel: string): Integer;
+    function BuscarBombaId(const vpTanqueId: Integer; const vpNomeBomba: string): Integer;
+    function BuscarNomeBomba: string;
+    function BuscarAbastecimentoId: Integer;
+    function BuscaPrecoCombustivel(const vpTipoCombustivel: string): Double;
+    procedure QuantidadeValorAbastecido(const vpValorCombustivel: Double; out vpQuantidadeLitros: Double; out vpValorAbastecido: Double);
+    procedure LimparTela;
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmPrincipal: TFrmPrincipal;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFrmPrincipal.btnAbastecerClick(Sender: TObject);
+var
+  viTanqueId: Integer;
+  viBombaId: Integer;
+  viAbastecimento: TAbastecimento;
+  viTipoCombustivel: string;
+  viValorCombustivel: Double;
+  viQuantidadeLitros: Double;
+  viValorAbastecido: Double;
+begin
+  viAbastecimento := nil;
+  try
+    if medtQtdAbastecimento.Text = '  .  ' then
+    begin
+      ShowMessage('Necessário definir o valor/quantidade a ser abastecido!');
+      medtQtdAbastecimento.SetFocus;
+      Exit;
+    end;
+
+    viTanqueId := BuscarTanqueId(viTipoCombustivel);
+    viBombaId := BuscarBombaId(viTanqueId, BuscarNomeBomba);
+
+    viAbastecimento := TAbastecimento.Create(dmConexao.FDConnection);
+    viAbastecimento.AbastecimentoId := BuscarAbastecimentoId;
+    viAbastecimento.BombaId := viBombaId;
+    viValorCombustivel := BuscaPrecoCombustivel(viTipoCombustivel);
+    QuantidadeValorAbastecido(viValorCombustivel, viQuantidadeLitros, viValorAbastecido);
+    viAbastecimento.QuantidadeLitros := viQuantidadeLitros;
+    viAbastecimento.ValorAbastecido := viValorAbastecido;
+
+    if not viAbastecimento.RegistrarAbastecimento then
+    begin
+      ShowMessage('Não foi possível realizar abastecimento!');
+      Exit;
+    end;
+
+    ShowMessage('Abastecimento realizado com sucesso!');
+
+    LimparTela;
+  finally
+    FreeAndNil(viAbastecimento);
+  end;
+end;
+
+function TFrmPrincipal.BuscaPrecoCombustivel(
+  const vpTipoCombustivel: string): Double;
+begin
+  Result := vlValorGasolina;
+  if vpTipoCombustivel = 'D' then
+    Result := vlValorDiesel;
+end;
+
+function TFrmPrincipal.BuscarAbastecimentoId: Integer;
+var
+  viAbastecimento: TAbastecimento;
+begin
+  viAbastecimento := nil;
+  try
+    viAbastecimento := TAbastecimento.Create(dmConexao.FDConnection);
+    Result := viAbastecimento.GerarSequencia;
+  finally
+    FreeAndNil(viAbastecimento);
+  end;
+end;
+
+function TFrmPrincipal.BuscarBombaId(
+  const vpTanqueId: Integer;
+  const vpNomeBomba: string): Integer;
+var
+  viBomba: TBomba;
+begin
+  viBomba := nil;
+  try
+    viBomba := TBomba.Create(vpTanqueId, vpNomeBomba, dmConexao.FDConnection);
+    Result := viBomba.BombaId;
+  finally
+    FreeAndNil(viBomba);
+  end;
+end;
+
+function TFrmPrincipal.BuscarNomeBomba: string;
+begin
+  if rbGasolina1.Checked then
+    Result := 'B1'
+  else
+  if rbGasolina2.Checked then
+    Result := 'B2'
+  else
+  if rbDiesel1.Checked then
+    Result := 'B3'
+  else
+  if rbDiesel2.Checked then
+    Result := 'B4';
+end;
+
+function TFrmPrincipal.BuscarTanqueId(out vpTipoCombustivel: string): Integer;
+var
+  viTanque: TTanque;
+begin
+    viTanque := nil;
+  try
+    vpTipoCombustivel := 'D';
+
+    if rbGasolina1.Checked or rbGasolina2.Checked then
+      vpTipoCombustivel := 'G';
+
+    viTanque := TTanque.Create(vpTipoCombustivel, dmConexao.FDConnection);
+    Result := viTanque.TanqueId;
+  finally
+    FreeAndNil(viTanque);
+  end;
+end;
+
+procedure TFrmPrincipal.Button1Click(Sender: TObject);
+var
+  viFrmRelatorio: TFrmRelatorio;
+begin
+  viFrmRelatorio := nil;
+  try
+//    FDQuery.Open;
+//    viFrmRelatorio := TFrmRelatorio.Create(Self);
+    FrmRelatorio.rlrRelatorio.Preview();
+  finally
+    FreeAndNil(viFrmRelatorio);
+  end;
+end;
+
+procedure TFrmPrincipal.cbTipoAbastecimentoChange(Sender: TObject);
+begin
+  medtQtdAbastecimento.Clear;
+end;
+
+procedure TFrmPrincipal.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  dmConexao.FDConnection.Close;
+end;
+
+procedure TFrmPrincipal.FormCreate(Sender: TObject);
+//var
+//  viConexao: TdmConexao;
+begin
+//  viConexao := nil;
+//  try
+//    viConexao := TdmConexao.Create(nil);
+//    viConexao.FDConnection.Close;
+//    viConexao.FDConnection.Open;
+
+    vlValorGasolina := 4.59;
+    vlValorDiesel := 5.00;
+//  finally
+//    FreeAndNil(viConexao);
+  end;
+end;
+
+procedure TFrmPrincipal.LimparTela;
+begin
+  medtQtdAbastecimento.Clear;
+  medtQtdAbastecimento.SetFocus;
+end;
+
+procedure TFrmPrincipal.QuantidadeValorAbastecido(
+  const vpValorCombustivel: Double;
+  out vpQuantidadeLitros: Double;
+  out vpValorAbastecido: Double);
+var
+  viQuantidadeValor: Double;
+  viPrecoCombustivel: Double;
+  viTeste: string;
+begin
+  viQuantidadeValor := StrToFloat(StringReplace(medtQtdAbastecimento.Text, '.', ',', [rfReplaceAll]));
+
+  if cbTipoAbastecimento.ItemIndex = 0 then
+  begin
+      vpQuantidadeLitros := viQuantidadeValor;
+      vpValorAbastecido := viQuantidadeValor*vpValorCombustivel;
+  end
+  else
+  if cbTipoAbastecimento.ItemIndex = 1 then
+  begin
+    vpQuantidadeLitros := viQuantidadeValor/vpValorCombustivel;
+    vpValorAbastecido := viQuantidadeValor;
+  end;
+end;
+
+end.

@@ -1,0 +1,276 @@
+unit Modelo;
+
+interface
+
+uses
+  SysUtils, Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Option, FireDAC.DatS, FireDAC.Stan.Param, FireDAC.DApt, FireDAC.Phys.FB,
+  Winapi.Windows, Winapi.Messages, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+
+type
+  TTanque = class
+    private
+      FTanqueId: Integer;
+      FTipoCombustivel: string;
+      FConexao: TFDConnection;
+    public
+      constructor Create(
+        const vpTipoCombustivel: string;
+        const vpConexao: TFDConnection);
+      property TanqueId: Integer read FTanqueId write FTanqueId;
+      property TipoCombustivel: string read FTipoCombustivel write FTipoCombustivel;
+      property Conexao: TFDConnection read FConexao write FConexao;
+  end;
+
+  TBomba = class
+  private
+    FBombaId: Integer;
+    FTanqueId: Integer;
+    FConexao: TFDConnection;
+  public
+    constructor Create(
+      const vpTanqueId: Integer;
+      const vpNomeBomba: string;
+      const vpConexao: TFDConnection);
+    property BombaId: Integer read FBombaId write FBombaId;
+    property TanqueId: Integer read FTanqueId write FTanqueId;
+    property Conexao: TFDConnection read FConexao write FConexao;
+  end;
+
+  TAbastecimento = class
+  private
+    FAbastecimentoId: Integer;
+    FBombaId: Integer;
+    FQuantidadeLitros: Double;
+    FValorAbastecido: Double;
+    FImposto: Double;
+    FValorTotal: Double;
+    FData: TDateTime;
+    FConexao: TFDConnection;
+    FTransaction: TFDTransaction;
+    FQuery: TFDQuery;
+    vlImposto: Double;
+
+    function BuscarDataHora: TDateTime;
+  public
+    constructor Create(const vpConexao: TFDConnection);
+    property AbastecimentoId: Integer read FAbastecimentoId write FAbastecimentoId;
+    property BombaId: Integer read FBombaId write FBombaId;
+    property QuantidadeLitros: Double read FQuantidadeLitros write FQuantidadeLitros;
+    property ValorAbastecido: Double read FValorAbastecido write FValorAbastecido;
+    property Imposto: Double read FImposto write FImposto;
+    property ValorTotal: Double read FValorTotal write FValorTotal;
+    property Data: TDateTime read FData write FData;
+    property Conexao: TFDConnection read FConexao write FConexao;
+
+    procedure BeginTransaction;
+    procedure CommitTransaction;
+    procedure RollbackTransaction;
+
+    function GerarSequencia: Integer;
+    function RegistrarAbastecimento: Boolean;
+  end;
+
+implementation
+
+{ TTanque }
+
+constructor TTanque.Create(
+  const vpTipoCombustivel: string;
+  const vpConexao: TFDConnection);
+var
+  viQuery: TFDQuery;
+begin
+  viQuery := nil;
+  try
+    viQuery := TFDQuery.Create(nil);
+    viQuery.Connection := vpConexao;
+    viQuery.SQL.Text := {$REGION 'P_TANQUE'}
+     'SELECT '+
+     '    TANQUE_ID '+
+     'FROM '+
+     '    P_TANQUE '+
+     'WHERE '+
+     '    TIPO_COMBUSTIVEL = :P_TIPO_COMBUSTIVEL ';
+     {$ENDREGION}
+    viQuery.ParamByName('P_TIPO_COMBUSTIVEL').AsString := vpTipoCombustivel;
+    viQuery.Open;
+
+    if viQuery.IsEmpty then
+      Exit;
+
+    FTanqueId := viQuery.FieldByName('TANQUE_ID').AsInteger;
+  finally
+    FreeAndNil(viQuery);
+  end;
+end;
+
+{ TBomba }
+
+constructor TBomba.Create(
+  const vpTanqueId: Integer;
+  const vpNomeBomba: string;
+  const vpConexao: TFDConnection);
+var
+  viQuery: TFDQuery;
+begin
+  viQuery := nil;
+  try
+    viQuery := TFDQuery.Create(nil);
+    viQuery.Connection := vpConexao;
+    viQuery.SQL.Text := {$REGION 'P_BOMBA'}
+     'SELECT '+
+     '    BOMBA_ID '+
+     'FROM '+
+     '    P_BOMBA '+
+     'WHERE '+
+     '    TANQUE_ID = :P_TANQUE_ID AND '+
+     '    NOME_BOMBA = :P_NOME_BOMBA ';
+    {$ENDREGION}
+    viQuery.ParamByName('P_TANQUE_ID').AsInteger := vpTanqueId;
+    viQuery.ParamByName('P_NOME_BOMBA').AsString := vpNomeBomba;
+    viQuery.Open;
+
+    if viQuery.IsEmpty then
+      Exit;
+
+    FBombaId := viQuery.FieldByName('BOMBA_ID').AsInteger;
+  finally
+    FreeAndNil(viQuery);
+  end;
+end;
+
+{ TAbastecimento }
+
+procedure TAbastecimento.BeginTransaction;
+begin
+  FTransaction.StartTransaction;
+end;
+
+function TAbastecimento.BuscarDataHora: TDateTime;
+var
+  viQuery: TFDQuery;
+begin
+  Result := 0;
+  viQuery := nil;
+
+  try
+    viQuery := TFDQuery.Create(nil);
+    viQuery.Connection := FConexao;
+    viQuery.SQL.Text := {$REGION 'DATA_HORA'}
+      'SELECT '+
+      '    CURRENT_TIMESTAMP AS DATA_HORA '+
+      'FROM '+
+      '    RDB$DATABASE ';
+    {$ENDREGION}
+    viQuery.Open;
+
+    if viQuery.IsEmpty then
+      Exit;
+
+    Result := viQuery.FieldByName('DATA_HORA').AsDateTime;
+  finally
+    FreeAndNil(viQuery);
+  end;
+end;
+
+procedure TAbastecimento.CommitTransaction;
+begin
+  FTransaction.Commit;
+end;
+
+constructor TAbastecimento.Create(const vpConexao: TFDConnection);
+begin
+  FConexao:= vpConexao;
+  FTransaction := TFDTransaction.Create(nil);
+  FTransaction.Connection := vpConexao;
+
+  FQuery := TFDQuery.Create(nil);
+  FQuery.Connection := vpConexao;
+  FQuery.Transaction := FTransaction;
+  FQuery.SQL.Text := {$REGION 'INSERT'}
+    'INSERT INTO P_ABASTECIMENTO ( '+
+    '    ABASTECIMENTO_ID, '+
+    '    BOMBA_ID, '+
+    '    QUANTIDADE_LITROS, '+
+    '    VALOR_ABASTECIDO, '+
+    '    IMPOSTO, '+
+    '    VALOR_TOTAL, '+
+    '    DATA) '+
+    'VALUES ( '+
+    '    :P_ABASTECIMENTO_ID, '+
+    '    :P_BOMBA_ID, '+
+    '    :P_QUANTIDADE_LITROS, '+
+    '    :P_VALOR_ABASTECIDO, '+
+    '    :P_IMPOSTO, '+
+    '    :P_VALOR_TOTAL, '+
+    '    :P_DATA) ';
+  {$ENDREGION}
+  FQuery.Params.Add('P_ABASTECIMENTO_ID', ftInteger);
+  FQuery.Params.Add('P_BOMBA_ID', ftInteger);
+  FQuery.Params.Add('P_QUANTIDADE_LITROS', ftFloat);
+  FQuery.Params.Add('P_VALOR_ABASTECIDO', ftFloat);
+  FQuery.Params.Add('P_IMPOSTO', ftFloat);
+  FQuery.Params.Add('P_VALOR_TOTAL', ftFloat);
+  FQuery.Params.Add('P_DATA', ftDateTime);
+  vlImposto := 0.13;
+end;
+
+function TAbastecimento.GerarSequencia: Integer;
+var
+  viQuery: TFDQuery;
+  viId: Integer;
+begin
+  viQuery := nil;
+  try
+    viQuery := TFDQuery.Create(nil);
+    viQuery.Connection := FConexao;
+    viQuery.SQL.Text :=
+     'SELECT '+
+     '    MAX(ABASTECIMENTO_ID) AS ID '+
+     'FROM '+
+     '    P_ABASTECIMENTO  ';
+    viQuery.Open;
+
+    viId := viQuery.FieldByName('ID').AsInteger;
+    if viId <= 0 then
+    begin
+      Result := 1;
+      Exit;
+    end;
+
+    Inc(viId);
+    Result := viId;
+  finally
+    FreeAndNil(viQuery);
+  end;
+end;
+
+function TAbastecimento.RegistrarAbastecimento: Boolean;
+begin
+  Result := False;
+  BeginTransaction;
+  try
+    FQuery.ParamByName('P_ABASTECIMENTO_ID').AsInteger := FAbastecimentoId;
+    FQuery.ParamByName('P_BOMBA_ID').AsInteger := FBombaId;
+    FQuery.ParamByName('P_QUANTIDADE_LITROS').AsFloat := QuantidadeLitros;
+    FQuery.ParamByName('P_VALOR_ABASTECIDO').AsFloat := ValorAbastecido;
+    FQuery.ParamByName('P_IMPOSTO').AsFloat := ValorAbastecido*vlImposto;
+    FQuery.ParamByName('P_VALOR_TOTAL').AsFloat := 0;
+    FQuery.ParamByName('P_DATA').AsDateTime := BuscarDataHora;
+    FQuery.ExecSQL;
+    CommitTransaction;
+    Result := True;
+  except
+    RollbackTransaction;
+    raise;
+  end;
+end;
+
+procedure TAbastecimento.RollbackTransaction;
+begin
+  FTransaction.Rollback;
+end;
+
+end.

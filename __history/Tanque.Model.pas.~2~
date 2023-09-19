@@ -1,0 +1,25 @@
+unit Tanque.Model;
+
+interface
+type
+  TTanque = class
+    private
+      FTanqueId: Integer;
+      FTipoCombustivel: string;
+    public
+      property TanqueId: Integer read FTanqueId write FTanqueId;
+      property TipoCombustivel: string read FTipoCombustivel write FTipoCombustivel;
+  end;
+
+  TBomba = class
+  private
+    FBombaId: Integer;
+    FTanqueId: Integer;
+  public
+    property BombaId: Integer read FBombaId write FBombaId;
+    property TanqueId: Integer read FTanqueId write FTanqueId;
+  end;
+
+implementation
+
+end.

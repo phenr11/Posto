@@ -1,0 +1,252 @@
+object FrmRelatorio: TFrmRelatorio
+  Left = 0
+  Top = 0
+  Caption = 'FrmRelatorio'
+  ClientHeight = 442
+  ClientWidth = 818
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  TextHeight = 15
+  object rlrRelatorio: TRLReport
+    Left = -8
+    Top = 0
+    Width = 794
+    Height = 1123
+    DataSource = DataSource
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    object rlbTitulo: TRLBand
+      Left = 38
+      Top = 38
+      Width = 718
+      Height = 32
+      BandType = btTitle
+      Borders.Sides = sdCustom
+      Borders.DrawLeft = False
+      Borders.DrawTop = False
+      Borders.DrawRight = False
+      Borders.DrawBottom = True
+      object rllabelTitulo: TRLLabel
+        Left = 257
+        Top = 7
+        Width = 204
+        Height = 16
+        Align = faCenter
+        Alignment = taCenter
+        Caption = 'RELAT'#211'RIO ABASTECIMENTOS'
+      end
+    end
+    object rlbColunas: TRLBand
+      Left = 38
+      Top = 70
+      Width = 718
+      Height = 22
+      BandType = btColumnHeader
+      Borders.Sides = sdCustom
+      Borders.DrawLeft = False
+      Borders.DrawTop = False
+      Borders.DrawRight = False
+      Borders.DrawBottom = True
+      object rllabelDataHora: TRLLabel
+        Left = 4
+        Top = 3
+        Width = 67
+        Height = 16
+        Caption = 'Data/Hora'
+      end
+      object rllabelCombustivel: TRLLabel
+        Left = 163
+        Top = 3
+        Width = 82
+        Height = 16
+        Caption = 'Combust'#237'vel'
+      end
+      object rllabelNomeBomba: TRLLabel
+        Left = 283
+        Top = 2
+        Width = 49
+        Height = 16
+        Caption = 'Bomba'
+      end
+      object rllabelLitros: TRLLabel
+        Left = 390
+        Top = 3
+        Width = 39
+        Height = 16
+        Caption = 'Litros'
+      end
+      object rllabelValorTotal: TRLLabel
+        Left = 486
+        Top = 3
+        Width = 74
+        Height = 16
+        Caption = 'Valor Total'
+      end
+      object rllabelImposto: TRLLabel
+        Left = 626
+        Top = 3
+        Width = 54
+        Height = 16
+        AutoSize = False
+        Caption = 'Imposto'
+      end
+    end
+    object rlbDados: TRLBand
+      Left = 38
+      Top = 92
+      Width = 718
+      Height = 22
+      Borders.Sides = sdCustom
+      Borders.DrawLeft = False
+      Borders.DrawTop = False
+      Borders.DrawRight = False
+      Borders.DrawBottom = True
+      BeforePrint = rlbDadosBeforePrint
+      object rldbNomeBomba: TRLDBText
+        Left = 259
+        Top = 2
+        Width = 98
+        Height = 16
+        Alignment = taCenter
+        DataField = 'NOME_BOMBA'
+        DataSource = DataSource
+        Text = ''
+      end
+      object rldbLitros: TRLDBText
+        Left = 390
+        Top = 2
+        Width = 143
+        Height = 16
+        Alignment = taJustify
+        DataField = 'QUANTIDADE_LITROS'
+        DataSource = DataSource
+        DisplayMask = '#,##0.00'
+        Text = ''
+      end
+      object rldbValorTotal: TRLDBText
+        Left = 486
+        Top = 2
+        Width = 140
+        Height = 16
+        DataField = 'VALOR_ABASTECIDO'
+        DataSource = DataSource
+        DisplayMask = 'R$ #,##0.00'
+        Text = ''
+      end
+      object rldbDataHora: TRLDBText
+        Left = 3
+        Top = 2
+        Width = 39
+        Height = 16
+        DataField = 'DATA'
+        DataSource = DataSource
+        Text = ''
+      end
+      object rllabelDescricaoCombustivel: TRLLabel
+        Left = 111
+        Top = 2
+        Width = 186
+        Height = 16
+        Alignment = taCenter
+      end
+      object rldbImposto: TRLDBText
+        Left = 626
+        Top = 2
+        Width = 65
+        Height = 16
+        DataField = 'IMPOSTO'
+        DataSource = DataSource
+        DisplayMask = 'R$ #,##0.00'
+        Text = ''
+      end
+    end
+    object rlbRodape: TRLBand
+      Left = 38
+      Top = 114
+      Width = 718
+      Height = 29
+      BandType = btFooter
+      Borders.Sides = sdCustom
+      Borders.DrawLeft = False
+      Borders.DrawTop = True
+      Borders.DrawRight = False
+      Borders.DrawBottom = False
+      object RLSystemInfo2: TRLSystemInfo
+        Left = 648
+        Top = 7
+        Width = 41
+        Height = 16
+        Text = ''
+      end
+    end
+  end
+  object FDQuery: TFDQuery
+    Connection = dmConexao.FDConnection
+    SQL.Strings = (
+      'SELECT'
+      '    P_A.QUANTIDADE_LITROS,'
+      '    P_A.VALOR_ABASTECIDO,'
+      '    P_A.IMPOSTO,'
+      '    P_A.DATA,'
+      '    P_B.NOME_BOMBA,'
+      '    P_T.TIPO_COMBUSTIVEL'
+      'FROM'
+      '    P_ABASTECIMENTO P_A'
+      'INNER JOIN'
+      '    P_BOMBA P_B ON P_B.BOMBA_ID = P_A.BOMBA_ID'
+      'INNER JOIN'
+      '    P_TANQUE P_T ON P_T.TANQUE_ID = P_B.TANQUE_ID')
+    Left = 496
+    Top = 328
+    object FDQueryQUANTIDADE_LITROS: TFMTBCDField
+      FieldName = 'QUANTIDADE_LITROS'
+      Origin = 'QUANTIDADE_LITROS'
+      Precision = 18
+      Size = 2
+    end
+    object FDQueryVALOR_ABASTECIDO: TFMTBCDField
+      FieldName = 'VALOR_ABASTECIDO'
+      Origin = 'VALOR_ABASTECIDO'
+      Precision = 18
+      Size = 2
+    end
+    object FDQueryIMPOSTO: TFMTBCDField
+      FieldName = 'IMPOSTO'
+      Origin = 'IMPOSTO'
+      Precision = 18
+      Size = 2
+    end
+    object FDQueryNOME_BOMBA: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'NOME_BOMBA'
+      Origin = 'NOME_BOMBA'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 3
+    end
+    object FDQueryTIPO_COMBUSTIVEL: TStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'TIPO_COMBUSTIVEL'
+      Origin = 'TIPO_COMBUSTIVEL'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 1
+    end
+    object FDQueryDATA: TSQLTimeStampField
+      FieldName = 'DATA'
+      Origin = '"DATA"'
+    end
+  end
+  object DataSource: TDataSource
+    DataSet = FDQuery
+    Left = 584
+    Top = 328
+  end
+end
