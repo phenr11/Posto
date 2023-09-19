@@ -202,7 +202,9 @@ object FrmRelatorio: TFrmRelatorio
       'INNER JOIN'
       '    P_BOMBA P_B ON P_B.BOMBA_ID = P_A.BOMBA_ID'
       'INNER JOIN'
-      '    P_TANQUE P_T ON P_T.TANQUE_ID = P_B.TANQUE_ID')
+      '    P_TANQUE P_T ON P_T.TANQUE_ID = P_B.TANQUE_ID'
+      'ORDER BY'
+      '    P_A.ABASTECIMENTO_ID     ')
     Left = 496
     Top = 328
     object FDQueryQUANTIDADE_LITROS: TFMTBCDField

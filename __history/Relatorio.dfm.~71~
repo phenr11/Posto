@@ -33,7 +33,7 @@ object FrmRelatorio: TFrmRelatorio
       Borders.DrawTop = False
       Borders.DrawRight = False
       Borders.DrawBottom = True
-      object RLLabel1: TRLLabel
+      object rllabelTitulo: TRLLabel
         Left = 257
         Top = 7
         Width = 204
@@ -54,42 +54,42 @@ object FrmRelatorio: TFrmRelatorio
       Borders.DrawTop = False
       Borders.DrawRight = False
       Borders.DrawBottom = True
-      object RLLabel2: TRLLabel
+      object rllabelDataHora: TRLLabel
         Left = 4
         Top = 3
-        Width = 121
+        Width = 67
         Height = 16
         Caption = 'Data/Hora'
       end
-      object RLLabel3: TRLLabel
+      object rllabelCombustivel: TRLLabel
         Left = 163
         Top = 3
         Width = 82
         Height = 16
         Caption = 'Combust'#237'vel'
       end
-      object RLLabel4: TRLLabel
+      object rllabelNomeBomba: TRLLabel
         Left = 283
         Top = 2
         Width = 49
         Height = 16
         Caption = 'Bomba'
       end
-      object RLLabel5: TRLLabel
+      object rllabelLitros: TRLLabel
         Left = 390
         Top = 3
-        Width = 50
+        Width = 39
         Height = 16
         Caption = 'Litros'
       end
-      object RLLabel6: TRLLabel
+      object rllabelValorTotal: TRLLabel
         Left = 486
         Top = 3
-        Width = 73
+        Width = 74
         Height = 16
         Caption = 'Valor Total'
       end
-      object RLLabel8: TRLLabel
+      object rllabelImposto: TRLLabel
         Left = 626
         Top = 3
         Width = 54
@@ -109,20 +109,20 @@ object FrmRelatorio: TFrmRelatorio
       Borders.DrawRight = False
       Borders.DrawBottom = True
       BeforePrint = rlbDadosBeforePrint
-      object RLDBText2: TRLDBText
-        Left = 283
+      object rldbNomeBomba: TRLDBText
+        Left = 259
         Top = 2
-        Width = 49
+        Width = 98
         Height = 16
         Alignment = taCenter
         DataField = 'NOME_BOMBA'
         DataSource = DataSource
         Text = ''
       end
-      object RLDBText3: TRLDBText
+      object rldbLitros: TRLDBText
         Left = 390
         Top = 2
-        Width = 50
+        Width = 143
         Height = 16
         Alignment = taJustify
         DataField = 'QUANTIDADE_LITROS'
@@ -130,33 +130,33 @@ object FrmRelatorio: TFrmRelatorio
         DisplayMask = '#,##0.00'
         Text = ''
       end
-      object RLDBText4: TRLDBText
+      object rldbValorTotal: TRLDBText
         Left = 486
         Top = 2
-        Width = 73
+        Width = 140
         Height = 16
         DataField = 'VALOR_ABASTECIDO'
         DataSource = DataSource
         DisplayMask = 'R$ #,##0.00'
         Text = ''
       end
-      object RLDBText5: TRLDBText
+      object rldbDataHora: TRLDBText
         Left = 3
         Top = 2
-        Width = 122
+        Width = 39
         Height = 16
         DataField = 'DATA'
         DataSource = DataSource
         Text = ''
       end
-      object RLLabel7: TRLLabel
-        Left = 163
+      object rllabelDescricaoCombustivel: TRLLabel
+        Left = 111
         Top = 2
-        Width = 82
+        Width = 186
         Height = 16
         Alignment = taCenter
       end
-      object RLDBText1: TRLDBText
+      object rldbImposto: TRLDBText
         Left = 626
         Top = 2
         Width = 65
@@ -167,7 +167,7 @@ object FrmRelatorio: TFrmRelatorio
         Text = ''
       end
     end
-    object RLBand1: TRLBand
+    object rlbRodape: TRLBand
       Left = 38
       Top = 114
       Width = 718
@@ -214,12 +214,6 @@ object FrmRelatorio: TFrmRelatorio
     object FDQueryVALOR_ABASTECIDO: TFMTBCDField
       FieldName = 'VALOR_ABASTECIDO'
       Origin = 'VALOR_ABASTECIDO'
-      Precision = 18
-      Size = 2
-    end
-    object FDQueryVALOR_TOTAL: TFMTBCDField
-      FieldName = 'VALOR_TOTAL'
-      Origin = 'VALOR_TOTAL'
       Precision = 18
       Size = 2
     end
