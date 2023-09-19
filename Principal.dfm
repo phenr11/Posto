@@ -95,7 +95,7 @@ object FrmPrincipal: TFrmPrincipal
     object medtQtdAbastecimento: TMaskEdit
       Left = 96
       Top = 160
-      Width = 117
+      Width = 121
       Height = 23
       AutoSize = False
       EditMask = '99.99;1;_'

@@ -64,23 +64,16 @@ object FrmRelatorio: TFrmRelatorio
       object rllabelCombustivel: TRLLabel
         Left = 163
         Top = 3
-        Width = 82
+        Width = 154
         Height = 16
-        Caption = 'Combust'#237'vel'
+        Caption = 'Tanque de Combust'#237'vel'
       end
       object rllabelNomeBomba: TRLLabel
-        Left = 283
+        Left = 363
         Top = 2
         Width = 49
         Height = 16
         Caption = 'Bomba'
-      end
-      object rllabelLitros: TRLLabel
-        Left = 390
-        Top = 3
-        Width = 39
-        Height = 16
-        Caption = 'Litros'
       end
       object rllabelValorTotal: TRLLabel
         Left = 486
@@ -88,14 +81,6 @@ object FrmRelatorio: TFrmRelatorio
         Width = 74
         Height = 16
         Caption = 'Valor Total'
-      end
-      object rllabelImposto: TRLLabel
-        Left = 626
-        Top = 3
-        Width = 54
-        Height = 16
-        AutoSize = False
-        Caption = 'Imposto'
       end
     end
     object rlbDados: TRLBand
@@ -110,24 +95,13 @@ object FrmRelatorio: TFrmRelatorio
       Borders.DrawBottom = True
       BeforePrint = rlbDadosBeforePrint
       object rldbNomeBomba: TRLDBText
-        Left = 259
+        Left = 339
         Top = 2
         Width = 98
         Height = 16
         Alignment = taCenter
         DataField = 'NOME_BOMBA'
         DataSource = DataSource
-        Text = ''
-      end
-      object rldbLitros: TRLDBText
-        Left = 390
-        Top = 2
-        Width = 143
-        Height = 16
-        Alignment = taJustify
-        DataField = 'QUANTIDADE_LITROS'
-        DataSource = DataSource
-        DisplayMask = '#,##0.00'
         Text = ''
       end
       object rldbValorTotal: TRLDBText
@@ -150,21 +124,11 @@ object FrmRelatorio: TFrmRelatorio
         Text = ''
       end
       object rllabelDescricaoCombustivel: TRLLabel
-        Left = 111
+        Left = 163
         Top = 2
         Width = 186
         Height = 16
-        Alignment = taCenter
-      end
-      object rldbImposto: TRLDBText
-        Left = 626
-        Top = 2
-        Width = 65
-        Height = 16
-        DataField = 'IMPOSTO'
-        DataSource = DataSource
-        DisplayMask = 'R$ #,##0.00'
-        Text = ''
+        Alignment = taJustify
       end
     end
     object rlbRodape: TRLBand
@@ -178,50 +142,50 @@ object FrmRelatorio: TFrmRelatorio
       Borders.DrawTop = True
       Borders.DrawRight = False
       Borders.DrawBottom = False
+      BeforePrint = rlbRodapeBeforePrint
       object RLSystemInfo2: TRLSystemInfo
-        Left = 648
+        Left = 4
         Top = 7
         Width = 41
         Height = 16
         Text = ''
       end
+      object rllabelSomatoria: TRLLabel
+        Left = 486
+        Top = 7
+        Width = 140
+        Height = 16
+        AutoSize = False
+      end
     end
   end
   object FDQuery: TFDQuery
+    Active = True
     Connection = dmConexao.FDConnection
     SQL.Strings = (
       'SELECT'
-      '    P_A.QUANTIDADE_LITROS,'
-      '    P_A.VALOR_ABASTECIDO,'
-      '    P_A.IMPOSTO,'
       '    P_A.DATA,'
+      '    P_T.TANQUE_ID,'
+      '    P_T.TIPO_COMBUSTIVEL,'
       '    P_B.NOME_BOMBA,'
-      '    P_T.TIPO_COMBUSTIVEL'
+      '    P_A.VALOR_ABASTECIDO'
       'FROM'
       '    P_ABASTECIMENTO P_A'
       'INNER JOIN'
       '    P_BOMBA P_B ON P_B.BOMBA_ID = P_A.BOMBA_ID'
       'INNER JOIN'
       '    P_TANQUE P_T ON P_T.TANQUE_ID = P_B.TANQUE_ID'
+      'GROUP BY'
+      
+        '    P_A.DATA, P_T.TANQUE_ID, P_T.TIPO_COMBUSTIVEL, P_B.NOME_BOMB' +
+        'A, P_A.VALOR_ABASTECIDO'
       'ORDER BY'
-      '    P_A.ABASTECIMENTO_ID     ')
+      '    P_A.DATA')
     Left = 496
     Top = 328
-    object FDQueryQUANTIDADE_LITROS: TFMTBCDField
-      FieldName = 'QUANTIDADE_LITROS'
-      Origin = 'QUANTIDADE_LITROS'
-      Precision = 18
-      Size = 2
-    end
     object FDQueryVALOR_ABASTECIDO: TFMTBCDField
       FieldName = 'VALOR_ABASTECIDO'
       Origin = 'VALOR_ABASTECIDO'
-      Precision = 18
-      Size = 2
-    end
-    object FDQueryIMPOSTO: TFMTBCDField
-      FieldName = 'IMPOSTO'
-      Origin = 'IMPOSTO'
       Precision = 18
       Size = 2
     end
@@ -244,6 +208,13 @@ object FrmRelatorio: TFrmRelatorio
     object FDQueryDATA: TSQLTimeStampField
       FieldName = 'DATA'
       Origin = '"DATA"'
+    end
+    object FDQueryTANQUE_ID: TIntegerField
+      AutoGenerateValue = arDefault
+      FieldName = 'TANQUE_ID'
+      Origin = 'TANQUE_ID'
+      ProviderFlags = []
+      ReadOnly = True
     end
   end
   object DataSource: TDataSource

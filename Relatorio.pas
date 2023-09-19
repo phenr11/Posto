@@ -22,26 +22,23 @@ type
     rllabelDataHora: TRLLabel;
     rllabelCombustivel: TRLLabel;
     rllabelNomeBomba: TRLLabel;
-    rllabelLitros: TRLLabel;
     rllabelValorTotal: TRLLabel;
     rlbRodape: TRLBand;
     RLSystemInfo2: TRLSystemInfo;
     FDQuery: TFDQuery;
-    FDQueryQUANTIDADE_LITROS: TFMTBCDField;
     FDQueryVALOR_ABASTECIDO: TFMTBCDField;
-    FDQueryIMPOSTO: TFMTBCDField;
     FDQueryNOME_BOMBA: TStringField;
     FDQueryTIPO_COMBUSTIVEL: TStringField;
     DataSource: TDataSource;
     rldbNomeBomba: TRLDBText;
-    rldbLitros: TRLDBText;
     rldbValorTotal: TRLDBText;
     rldbDataHora: TRLDBText;
     FDQueryDATA: TSQLTimeStampField;
     rllabelDescricaoCombustivel: TRLLabel;
-    rllabelImposto: TRLLabel;
-    rldbImposto: TRLDBText;
+    rllabelSomatoria: TRLLabel;
+    FDQueryTANQUE_ID: TIntegerField;
     procedure rlbDadosBeforePrint(Sender: TObject; var PrintIt: Boolean);
+    procedure rlbRodapeBeforePrint(Sender: TObject; var PrintIt: Boolean);
   private
     { Private declarations }
   public
@@ -50,7 +47,7 @@ type
 
 var
   FrmRelatorio: TFrmRelatorio;
-
+  vlSomaValores: Double;
 implementation
 
 {$R *.dfm}
@@ -58,9 +55,17 @@ implementation
 procedure TFrmRelatorio.rlbDadosBeforePrint(Sender: TObject;
   var PrintIt: Boolean);
 begin
-  rllabelDescricaoCombustivel.Caption := 'Gasolina';
+  rllabelDescricaoCombustivel.Caption := FDQueryTANQUE_ID.AsString + ' - Gasolina';
   if FDQueryTIPO_COMBUSTIVEL.AsString = 'D' then
-    rllabelDescricaoCombustivel.Caption := 'Diesel';
+    rllabelDescricaoCombustivel.Caption := FDQueryTANQUE_ID.AsString + ' - Diesel';
+
+  vlSomaValores := vlSomaValores + FDQueryVALOR_ABASTECIDO.AsFloat;
+end;
+
+procedure TFrmRelatorio.rlbRodapeBeforePrint(Sender: TObject;
+  var PrintIt: Boolean);
+begin
+  rllabelSomatoria.Caption := FormatFloat('R$ #,###,##0.00', vlSomaValores);
 end;
 
 end.
